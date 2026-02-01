@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>USD Currency Rates</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      margin-bottom: 5px;
+    }
+    .updated {
+      font-size: 12px;
+      color: gray;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 15%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: right;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    td:first-child, th:first-child {
+      text-align: left;
+    }
+    /* Highlight INR */
+    .highlight {
+      background-color: yellow;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>💱 Currency Rates (Base: USD)</h2>
+  <div class="updated" id="updated">Loading...</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Currency</th>
+        <th>Rate</th>
+      </tr>
+    </thead>
+    <tbody id="ratesTable">
+      <tr>
+        <td colspan="2">Fetching data...</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script>
+    const API_URL = "https://api.frankfurter.app/latest?from=USD";
+    const tableBody = document.getElementById("ratesTable");
+    const updatedText = document.getElementById("updated");
+
+    async function fetchRates() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        const rates = data.rates;
+
+        // Clear table
+        tableBody.innerHTML = "";
+
+        // 1️⃣ First, handle INR and highlight it
+        if (rates.INR) {
+          const row = document.createElement("tr");
+          row.classList.add("highlight");
+          row.innerHTML = `<td>INR</td><td>${rates.INR}</td>`;
+          tableBody.appendChild(row);
+          delete rates.INR; // remove from remaining
+        }
+
+        // 2️⃣ Then sort remaining symbols alphabetically
+        Object.keys(rates)
+          .sort()
+          .forEach(symbol => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${symbol}</td><td>${rates[symbol]}</td>`;
+            tableBody.appendChild(row);
+          });
+
+        // 3️⃣ Update timestamp
+        updatedText.innerText =
+          `Last updated: ${new Date().toLocaleTimeString()} • Refreshes every 1 minute`;
+
+      } catch (error) {
+        tableBody.innerHTML =
+          `<tr><td colspan="2">Error loading data</td></tr>`;
+        updatedText.innerText = "Failed to fetch data";
+        console.error(error);
+      }
+    }
+
+    // Initial load
+    fetchRates();
+
+    // Refresh every 1 minute
+    setInterval(fetchRates, 60000);
+  </script>
+
+</body>
+</html>
