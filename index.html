@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -41,7 +41,7 @@
 </head>
 <body>
 
-  <h2>💱 Currency Rates (Base: USD)</h2>
+  <h2>ðŸ’± Currency Rates (Base: USD)</h2>
   <div class="updated" id="updated">Loading..........</div>
 
   <table>
@@ -57,9 +57,11 @@
       </tr>
     </tbody>
   </table>
+  <script src='config.js'></script>
+
 
   <script>
-    const API_URL = "https://api.frankfurter.app/latest?from=USD";
+    const API_URL = window.APP_CONFIG.API_URL;
     const tableBody = document.getElementById("ratesTable");
     const updatedText = document.getElementById("updated");
 
@@ -72,7 +74,7 @@
         // Clear table
         tableBody.innerHTML = "";
 
-        // 1️⃣ First, handle INR and highlight it
+        // 1.First, handle INR and highlight it
         if (rates.INR) {
           const row = document.createElement("tr");
           row.classList.add("highlight");
@@ -81,7 +83,7 @@
           delete rates.INR; // remove from remaining
         }
 
-        // 2️⃣ Then sort remaining symbols alphabetically
+        // 2. Then sort remaining symbols alphabetically
         Object.keys(rates)
           .sort()
           .forEach(symbol => {
@@ -90,9 +92,9 @@
             tableBody.appendChild(row);
           });
 
-        // 3️⃣ Update timestamp
+        // 3. Update timestamp
         updatedText.innerText =
-          `Last updated: ${new Date().toLocaleTimeString()} • Refreshes every 1 minute`;
+          `Last updated: ${new Date().toLocaleTimeString()} â€¢ Refreshes every 1 minute`;
 
       } catch (error) {
         tableBody.innerHTML =
