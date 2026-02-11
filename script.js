@@ -5,43 +5,36 @@ const apiUrl = atob(CONFIG.API_KEY_ENCODED);
     const updatedText = document.getElementById("updated");
 
     async function fetchRates() {
-      try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        const rates = data.rates;
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    const { INR, ...otherRates } = data.rates;
 
-        // Clear table
-        tableBody.innerHTML = "";
+    // Build all rows in memory first
+    let rowsHtml = "";
 
-        // 1.First, handle INR and highlight it
-        if (rates.INR) {
-          const row = document.createElement("tr");
-          row.classList.add("highlight");
-          row.innerHTML = `<td>INR</td><td>${rates.INR}</td>`;
-          tableBody.appendChild(row);
-          delete rates.INR; // remove from remaining
-        }
-
-        // 2. Then sort remaining symbols alphabetically
-        Object.keys(rates)
-          .sort()
-          .forEach(symbol => {
-            const row = document.createElement("tr");
-            row.innerHTML = `<td>${symbol}</td><td>${rates[symbol]}</td>`;
-            tableBody.appendChild(row);
-          });
-
-        // 3. Update timestamp
-        updatedText.innerText =
-          `Last updated: ${new Date().toLocaleTimeString()} Refreshes every 1 minute`;
-
-      } catch (error) {
-        tableBody.innerHTML =
-          `<tr><td colspan="2">Error loading data</td></tr>`;
-        updatedText.innerText = "Failed to fetch data";
-        console.error(error);
-      }
+    // 1. Handle INR first
+    if (INR) {
+      rowsHtml += `<tr class="highlight"><td>INR</td><td>${INR}</td></tr>`;
     }
+
+    // 2. Sort and add the rest
+    Object.keys(otherRates)
+      .sort()
+      .forEach(symbol => {
+        rowsHtml += `<tr><td>${symbol}</td><td>${otherRates[symbol]}</td></tr>`;
+      });
+
+    // 3. Update DOM once to prevent flickering
+    tableBody.innerHTML = rowsHtml;
+    updatedText.innerText = `Last updated: ${new Date().toLocaleTimeString()} (Refreshes every 1 min)`;
+
+  } catch (error) {
+    tableBody.innerHTML = `<tr><td colspan="2" style="color:red;">Error loading rates</td></tr>`;
+    updatedText.innerText = "Connection failed.";
+    console.error("Fetch error:", error);
+  }
+}
 
     // Initial load
     fetchRates();
